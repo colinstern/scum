@@ -2,6 +2,11 @@ package scum;
 
 public class Player implements PlayerInterface{
 
+	/**
+	 * The player's unique ID.
+	 */
+	private int id;
+	
 	@Override
 	public boolean play(Card[] cards) {
 		// TODO Auto-generated method stub

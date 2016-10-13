@@ -6,10 +6,13 @@ package scum;
  *
  */
 public class Game implements GameInterface {
+	
+	Deck deck;
 	/**
 	 * Initializes the game with n players.
 	 */
 	public Game(int n) {
+		deck = new Deck();
 	//TODO	
 	}
 	
@@ -40,6 +43,7 @@ public class Game implements GameInterface {
 	@Override
 	public void start() {
 		// TODO Auto-generated method stub
+		deck.print(); //TODO remove
 		
 	}
 

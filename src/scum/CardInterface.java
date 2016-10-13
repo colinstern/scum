@@ -24,4 +24,10 @@ public interface CardInterface {
 	 * @return
 	 */
 	public String getNumber();
+	
+	/**
+	 * Prints the card as a string.
+	 * @return Card represented as a string.
+	 */
+	public String toString();
 }

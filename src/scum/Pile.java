@@ -1,23 +1,28 @@
 package scum;
 
+import java.util.Stack;
+
 public class Pile implements PileInterface {
 
+	private Stack<Card> pile;
+	
 	@Override
 	public void print() {
-		// TODO Auto-generated method stub
+		for (Card card : pile) {
+			System.out.println(card);
+		}
 		
 	}
 
 	@Override
 	public void printLastMove() {
-		// TODO Auto-generated method stub
+		// TODO Somehow remember the last move
 		
 	}
 
 	@Override
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
+		return pile.empty();
 	}
 
 }
