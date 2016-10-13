@@ -1,0 +1,40 @@
+package scum;
+
+/**
+ * Defines the game logic.
+ * @author cost
+ *
+ */
+public interface GameInterface {
+
+	/**
+	 * Determines if someone has won.
+	 * @return True if some player has won.
+	 */
+	public boolean winnerExists();
+	
+	/**
+	 * If a player has won, returns which player.
+	 * @return The winning Player if a Player has won. Else, returns null.
+	 */
+	public Player winner();
+	
+	/**
+	 * Checks if the given move if valid. Compares the cards trying to be played with the pile. If the move is valid, update the pile.
+	 * If not, tell the player to make a valid move.
+	 * @return Whether the move is valid or not.
+	 */
+	public boolean isValidMove(Card[] cards);
+	
+	/**
+	 * Checks if it is the given player's turn.
+	 * @param player The player to check.
+	 * @return Whether or not it is the player's turn.
+	 */
+	public boolean isTurn(Player player);
+	
+	/**
+	 * Starts the game.
+	 */
+	public void start();
+}
