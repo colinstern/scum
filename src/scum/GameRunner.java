@@ -33,7 +33,6 @@ public class GameRunner {
 			Game game = new Game(n);
 			game.start();
 			
-			System.out.println("Game over.\n");
 			scanner.close();
 
 	}

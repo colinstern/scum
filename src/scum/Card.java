@@ -10,7 +10,7 @@ public class Card implements CardInterface {
 	public Card(String number, String suit) throws ScumException {
 		if (!((number.equals("2") || number.equals("3") ||  number.equals("4") || number.equals("5") || number.equals("6") || number.equals("7") || number.equals("8") ||
 				 number.equals("9") || number.equals("10") || number.equals("jack") || number.equals("queen") || number.equals("king") || number.equals("ace"))
-				|| (suit.equals("spades") || suit.equals("hearts") || suit.equals("diamonds") || suit.equals("clubs"))))
+				&& (suit.equals("spades") || suit.equals("hearts") || suit.equals("diamonds") || suit.equals("clubs"))))
 				throw new ScumException("Not a valid Card.");
 		this.number = number;
 		this.suit = suit;

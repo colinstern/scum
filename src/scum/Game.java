@@ -1,6 +1,7 @@
 package scum;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -82,6 +83,8 @@ public class Game implements GameInterface {
 				throw new ScumException("More than one winner?!");
 			}
 		}
+		if (winner == null)
+			throw new ScumException("No winner!");
 		return winner;
 	}
 
@@ -106,8 +109,12 @@ public class Game implements GameInterface {
 	public Card[] castStringsToCards(String[] strings) throws ScumException {
 		Card[] cards = new Card[strings.length];
 		for (int i = 0; i < strings.length; i++) {
+			try {
 			String[] tokens = strings[i].split(" "); //split on the spaces
-			cards[i] = new Card(tokens[0], tokens[3]);
+			cards[i] = new Card(tokens[0], tokens[2]); //given the String "3 of clubs", feed "3" and "clubs" to the Card constructor
+			} catch (ArrayIndexOutOfBoundsException e) {
+				throw new ScumException("A card has been entered incorrectly.");
+			}
 		}
 		return cards;
 	}
@@ -134,39 +141,50 @@ public class Game implements GameInterface {
 		Card[] cards;
 		while (true) {
 			try {
-				System.out.println("Enter cards to play. Cards must be comma-separated, like this: 3 of clubs,3 of diamonds");
+				System.out.println("Enter cards to play. Cards must be comma-separated, like this: 3 of clubs, 3 of diamonds\nIf you do not wish to play a card, enter \"pass\".");
 				input = scanner.nextLine();
-				tokens = input.split(",");
-				if ((tokens.length < 1)) {
-					System.out.println("Please play a card.\n");
-					throw new ScumException("No cards played.\n");
-				}
+				if (input.equals("pass"))
+					break;
+				tokens = input.split(", ");
 				try {
 					cards = castStringsToCards(tokens);
 				} catch (ScumException e) {
-					System.out.println("Could not interpret the input. Please enter again.");
-					break;
+					System.out.println(e.getMessage() + " Could not interpret the input. Please enter again.");
+					continue;
 				}
 				if (!isValidMove(cards))  {
 					throw new ScumException("This is not a valid move. Please try again.");
 				}
+				System.out.println("You entered: ");
+				for (Card card: cards)
+					System.out.println(card);
 				
 			} catch (ScumException e) {
-				System.out.println();
-			} catch (Exception e){
-				
+				System.out.println(e.getMessage());
+				continue;
 			}
 			break;
 		} 
+		//scanner.close(); 
 	}
 
 
 	@Override
 	public void start() {
-		int maxTurns = 5000;
+		int maxTurns = 5;
 		for (int i = 0; !winnerExists() && i < maxTurns; i++) {
 			giveTurn(i % numberOfPlayers);
 		}
+		if (winnerExists()) {
+			try {
+				System.out.println(winner() + " is President!");
+			} catch (ScumException e) {
+				System.out.println(e.getMessage());
+			}
+		} else {
+			System.out.println("Max turns exceeded.");
+		}
+		System.out.println("Game over.\n");
 	}
 }
 
