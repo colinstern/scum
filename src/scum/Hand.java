@@ -8,32 +8,35 @@ public class Hand implements HandInterface{
 	
 	public Hand() {
 		hand = new ArrayList<Card>();
-		receiveCardsFromDeal(hand);
 	}
 	
 	/**
-	 * Someohow receive cards dealt from the deck.
+	 * Somehow receive cards dealt from the deck.
 	 */
-	public void receiveCardsFromDeal(ArrayList<Card> hand) {
-		//TODO work with Deck to make this
+	public void addCardFromDeal(Card card) {
+		hand.add(card);
 	}
 	
 	@Override
 	public int getSize() {
-		// TODO Auto-generated method stub
-		return 0;
+		return hand.size();
 	}
 
 	@Override
 	public void sort() {
-		// TODO Auto-generated method stub
-		
+		hand.sort(new CardComparator());
+
 	}
 
 	@Override
 	public void print() {
-		// TODO Auto-generated method stub
-		
+		int i = 0;
+		for (Card card: hand) {
+			System.out.println(card);
+			i++;
+		}
+		System.out.println(i);
+
 	}
 
 }

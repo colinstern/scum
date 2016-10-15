@@ -13,9 +13,10 @@ public interface DeckInterface {
 	public void shuffle();
 	
 	/**
-	 * Distribute the cards equally to each player.
+	 * Returns one random card from the deck.
+	 * @throws ScumException If deck is empty.
 	 */
-	public void deal();
+	public Card deal() throws ScumException;
 	
 	/**
 	 * Prints the current state of the deck.

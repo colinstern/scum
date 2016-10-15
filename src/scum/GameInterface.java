@@ -16,8 +16,9 @@ public interface GameInterface {
 	/**
 	 * If a player has won, returns which player.
 	 * @return The winning Player if a Player has won. Else, returns null.
+	 * @throws ScumException If there is an error and more than one player has won.
 	 */
-	public Player winner();
+	public Player winner() throws ScumException;
 	
 	/**
 	 * Checks if the given move if valid. Compares the cards trying to be played with the pile. If the move is valid, update the pile.
@@ -34,7 +35,7 @@ public interface GameInterface {
 	public boolean isTurn(Player player);
 	
 	/**
-	 * Starts the game.
+	 * Starts the game. Manages the players turns and the game runtime.
 	 */
 	public void start();
 }
