@@ -31,6 +31,27 @@ public class Card implements CardInterface {
 		return number;
 	}
 	
+	public int getNumberAsInt() {
+		int cardNumber;
+		switch (number) {
+		case ("jack"):
+			cardNumber = 11;
+			break;
+		case ("queen"):
+			cardNumber = 12;
+			break;
+		case ("king"):
+			cardNumber = 13;
+			break;
+		case ("ace"):
+			cardNumber = 14;
+			break;
+		default:
+			cardNumber = Integer.parseInt(number);
+		}
+		return cardNumber;
+	}
+	
 	@Override
 	public String toString() {
 		return getSuitAndNumber();
@@ -69,6 +90,9 @@ public class Card implements CardInterface {
 			break;
 		case ("ace"):
 			cardNumber = 14;
+			break;
+		case ("2") :
+			cardNumber = 15;
 			break;
 		default:
 			cardNumber = Integer.parseInt(number);

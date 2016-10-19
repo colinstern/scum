@@ -90,14 +90,23 @@ public class Game implements GameInterface {
 
 	@Override
 	public boolean isValidMove(Card[] cards) {
-		// TODO Auto-generated method stub
+		ArrayList<Card> cardsList = new ArrayList<Card>();
+		for (Card card : cards)
+			cardsList.add(card);
+		if (pile.isEmpty() && cardsList.size() == 1) {
+			pile.add(cards);
+			return true;
+		}
+		if (!pile.isEmpty() && cardsList.get(0).getNumberAsInt() >= pile.peek().getNumberAsInt()) {//singles and card is higher or equal to previous card 
+			pile.add(cards);
+				return true;
+		}
 		return false;
 	}
 
 	@Override
-	public boolean isTurn(Player player) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isTurn(int playerId) {
+		return (currentPlayer == playerId);
 	}
 
 	/**
@@ -173,7 +182,8 @@ public class Game implements GameInterface {
 	public void start() {
 		int maxTurns = 5;
 		for (int i = 0; !winnerExists() && i < maxTurns; i++) {
-			giveTurn(i % numberOfPlayers);
+			currentPlayer = i % numberOfPlayers;
+			giveTurn(currentPlayer);
 		}
 		if (winnerExists()) {
 			try {

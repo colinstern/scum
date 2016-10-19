@@ -21,7 +21,7 @@ public interface GameInterface {
 	public Player winner() throws ScumException;
 	
 	/**
-	 * Checks if the given move if valid. Compares the cards trying to be played with the pile. If the move is valid, update the pile.
+	 * Checks if the given move if valid. Compares the cards trying to be played with the pile. If the move is valid, add the cards to the pile.
 	 * If not, tell the player to make a valid move.
 	 * @return Whether the move is valid or not.
 	 */
@@ -29,10 +29,10 @@ public interface GameInterface {
 	
 	/**
 	 * Checks if it is the given player's turn.
-	 * @param player The player to check.
+	 * @param playerId The player to check, denoted by his ID.
 	 * @return Whether or not it is the player's turn.
 	 */
-	public boolean isTurn(Player player);
+	public boolean isTurn(int playerId);
 	
 	/**
 	 * Starts the game. Manages the players turns and the game runtime.
