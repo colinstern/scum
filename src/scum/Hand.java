@@ -17,6 +17,10 @@ public class Hand implements HandInterface{
 		hand.add(card);
 	}
 	
+	public boolean remove(Card card) {
+		return hand.remove(card);
+	}
+	
 	@Override
 	public int getSize() {
 		return hand.size();
@@ -30,12 +34,9 @@ public class Hand implements HandInterface{
 
 	@Override
 	public void print() {
-		int i = 0;
-		for (Card card: hand) {
+		for (Card card: hand) 
 			System.out.println(card);
-			i++;
-		}
-		System.out.println(i);
+		System.out.println("Size of hand: " + getSize());
 
 	}
 

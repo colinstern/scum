@@ -48,7 +48,9 @@ public class Player implements PlayerInterface{
 
 	@Override
 	public void printHand() {
-		// TODO Auto-generated method stub
+		hand.sort();
+		System.out.println("Player " + id + "'s hand:");
+		hand.print();
 		
 	}
 

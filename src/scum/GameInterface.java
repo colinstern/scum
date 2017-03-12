@@ -35,6 +35,14 @@ public interface GameInterface {
 	public boolean isTurn(int playerId);
 	
 	/**
+	 * Removes cards from player i's hand and places them in the pile.
+	 * @param cards Cards player i has played
+	 * @param i Player id
+	 * @return true if move is successful, false otherwise
+	 */
+	public boolean makeMove(Card[] cards, int i);
+	
+	/**
 	 * Starts the game. Manages the players turns and the game runtime.
 	 */
 	public void start();

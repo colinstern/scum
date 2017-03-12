@@ -23,6 +23,10 @@ public class Game implements GameInterface {
 	private int currentPlayer;
 
 	private int numberOfPlayers;
+	
+	private int sizeOfLastMove;
+	
+	private Card lastPlayedCard;
 	/**
 	 * Initializes the game with n players.
 	 */
@@ -36,6 +40,8 @@ public class Game implements GameInterface {
 		pile = new Pile();
 		currentPlayer = 0;
 		numberOfPlayers = n;
+		sizeOfLastMove = 0;
+		lastPlayedCard = null;
 		//TODO	
 	}
 
@@ -93,15 +99,19 @@ public class Game implements GameInterface {
 		ArrayList<Card> cardsList = new ArrayList<Card>();
 		for (Card card : cards)
 			cardsList.add(card);
-		if (pile.isEmpty() && cardsList.size() == 1) {
-			pile.add(cards);
-			return true;
+		return true;
+	}
+	
+	@Override
+	public boolean makeMove(Card[] cards, int i) {
+		for (Card card : cards) {
+			if (!players.get(i).getHand().remove(card))
+				return false;
+			pile.add(card);
 		}
-		if (!pile.isEmpty() && cardsList.get(0).getNumberAsInt() >= pile.peek().getNumberAsInt()) {//singles and card is higher or equal to previous card 
-			pile.add(cards);
-				return true;
-		}
-		return false;
+		sizeOfLastMove = cards.length;
+		lastPlayedCard = cards[cards.length - 1];
+		return true;
 	}
 
 	@Override
@@ -154,6 +164,10 @@ public class Game implements GameInterface {
 				input = scanner.nextLine();
 				if (input.equals("pass"))
 					break;
+				if (input.equals("hand")) {
+					players.get(i).printHand();
+					continue;
+				}
 				tokens = input.split(", ");
 				try {
 					cards = castStringsToCards(tokens);
@@ -167,6 +181,7 @@ public class Game implements GameInterface {
 				System.out.println("You entered: ");
 				for (Card card: cards)
 					System.out.println(card);
+				makeMove(cards, i);
 				
 			} catch (ScumException e) {
 				System.out.println(e.getMessage());

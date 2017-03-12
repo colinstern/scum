@@ -73,7 +73,7 @@ public class Deck implements DeckInterface {
 			throw new ScumException("Deck is empty.");
 		Random rand = new Random();
 		int randomNum = rand.nextInt((deck.size()));	//random int is in range of the size of the deck 
-		return deck.get(randomNum);
+		return deck.remove(randomNum);
 	}
 	
 	public int getSize() {
