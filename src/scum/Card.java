@@ -56,6 +56,11 @@ public class Card implements CardInterface {
 	public String toString() {
 		return getSuitAndNumber();
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return compareTo((Card) obj) == 0;
+	}
 
 	/**
 	 * Stores suitValue as most significant digit, while card number is stored as least two significant digits

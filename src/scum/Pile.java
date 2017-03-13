@@ -60,9 +60,10 @@ public class Pile implements PileInterface {
 	}
 
 	@Override
+	/* Prints from top down because this is more intuitive */
 	public void print() {
-		for (Card card : pile) {
-			System.out.println(card);
+		for (int i = pile.size() - 1; i >= 0; i--) {
+			System.out.println(pile.get(i));
 		}
 
 	}

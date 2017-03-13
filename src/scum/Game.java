@@ -27,6 +27,8 @@ public class Game implements GameInterface {
 	private int sizeOfLastMove;
 	
 	private Card lastPlayedCard;
+	
+	private boolean skipNextTurnFlag;
 	/**
 	 * Initializes the game with n players.
 	 */
@@ -42,6 +44,7 @@ public class Game implements GameInterface {
 		numberOfPlayers = n;
 		sizeOfLastMove = 0;
 		lastPlayedCard = null;
+		skipNextTurnFlag = false;
 		//TODO	
 	}
 
@@ -95,21 +98,110 @@ public class Game implements GameInterface {
 	}
 
 	@Override
-	public boolean isValidMove(Card[] cards) {
+	public boolean isValidMove(Card[] cards, int i) {
 		ArrayList<Card> cardsList = new ArrayList<Card>();
 		for (Card card : cards)
 			cardsList.add(card);
+		/* Make sure player has cards he is playing */
+		if (!(players.get(i).getHand().contains(cards)))
+				return false;
+		
+		/* Check if player is playing a 2 as first card*/
+		if (cards[0].getNumberAsInt() == 2) {
+			return twoChecker(cardsList);
+		}
+		
+		/* Normal play: Check that cards are all same number, greater or equal to last move,
+		 * and are following singles, doubles, etc. */
+		return checkNormalPlay(cardsList);		
+	}
+	
+	/**
+	 * A recursive checker for valid moves with 2's.
+	 */
+	public boolean twoChecker(ArrayList<Card> cardsList) {
+		/* Inductive */
+		cardsList.get
+		
+		/* Check if nothing, singles, doubles, triples or social is after the 2, make sure length is appropriate*/
+		if ((cardsList.size() - 1) > 4)
+			return false;
+		/* Make sure cards are of same number */
+		if (cardsList.size() > 1) {
+		int firstCardNum = cardsList.get(1).getNumberAsInt();
+			for (int j = 2; j < cardsList.size(); j++) {
+				if (cardsList.get(j).getNumberAsInt() != firstCardNum)
+					return false;
+			}
+		}
+		
+		/* Take subarray of cards after the 2 */
+		ArrayList<Card> cardsSublist = new ArrayList<Card>();
+		for (int k = 0; k < cardsList.size() - 1; k++) {
+			cardsSublist.add(k, cardsList.get(k + 1));
+		}
+		/* Check that cards after the 2 follow normal play rules */
+		if (!checkNormalPlay(cardsSublist))
+			return false;
+		else {
+			/* Set to singles, doubles, triples after the 2 */
+			sizeOfLastMove = cardsList.size() - 1;
+			/* Null lastPlayedCard so we can play whatever we want */
+			lastPlayedCard = null;
+			
+			return true;
+		}
+	}
+	
+	
+	public boolean areCardsAllSameNumber(ArrayList<Card> cardsList) {
+		/* Empty move is trivially correct */
+		if (cardsList.size() < 1)
+			return true;
+		int firstCardNum = cardsList.get(0).getNumberAsInt();
+		for (Card card : cardsList) {
+			if (card.getNumberAsInt() != firstCardNum)
+				return false;
+		}
 		return true;
 	}
+	
+	public boolean checkNormalPlay(ArrayList<Card> cardsList) {
+		/* Normal play: Check that cards are all same number, greater or equal to last move,
+		 * and are following singles, doubles, etc. */
+		/* Empty move is trivially correct */
+		if (cardsList.size() < 1)
+			return true;
+		if (!areCardsAllSameNumber(cardsList))
+			return false;
+		if (lastPlayedCard != null && cardsList.get(0).getNumberAsInt() < lastPlayedCard.getNumberAsInt())
+			return false; 
+		if (sizeOfLastMove != 0 && cardsList.size() != sizeOfLastMove)
+			return false;
+		if (sizeOfLastMove == 0) 
+			sizeOfLastMove = cardsList.size();
+		
+		/* Check for skips - if in singles, a card played in last turn had same number as card played in this turn */
+		if (lastPlayedCard != null && ((cardsList.get(0).getNumberAsInt() == lastPlayedCard.getNumberAsInt()) && sizeOfLastMove == 1))
+			skipNextTurn();
+		
+		return true;
+	}
+	
+	/**
+	 * Skip next player's turn.
+	 */
+	public void skipNextTurn() {
+		skipNextTurnFlag = true;
+	}
+	
 	
 	@Override
 	public boolean makeMove(Card[] cards, int i) {
 		for (Card card : cards) {
-			if (!players.get(i).getHand().remove(card))
-				return false;
+			players.get(i).getHand().remove(card);
 			pile.add(card);
 		}
-		sizeOfLastMove = cards.length;
 		lastPlayedCard = cards[cards.length - 1];
 		return true;
 	}
@@ -153,19 +245,23 @@ public class Game implements GameInterface {
 	 * @param i The player who gets a turn
 	 */
 	public void giveTurn(int i) {
-		System.out.printf("Player %d, it is your turn.\n", i);
+		System.out.printf("\nPlayer %d, it is your turn.\n", i);
 		Scanner scanner = new Scanner(System.in);
 		String input;
 		String[] tokens;
 		Card[] cards;
 		while (true) {
 			try {
-				System.out.println("Enter cards to play. Cards must be comma-separated, like this: 3 of clubs, 3 of diamonds\nIf you do not wish to play a card, enter \"pass\".");
+				System.out.println("Enter cards to play. Cards must be comma-separated, like this: 3 of clubs, 3 of diamonds\nIf you do not wish to play a card, enter \"pass\". To see your hand, enter \"hand\".");
 				input = scanner.nextLine();
 				if (input.equals("pass"))
 					break;
 				if (input.equals("hand")) {
 					players.get(i).printHand();
+					continue;
+				}
+				if (input.equals("pile")) {
+					pile.print();
 					continue;
 				}
 				tokens = input.split(", ");
@@ -175,7 +271,7 @@ public class Game implements GameInterface {
 					System.out.println(e.getMessage() + " Could not interpret the input. Please enter again.");
 					continue;
 				}
-				if (!isValidMove(cards))  {
+				if (!isValidMove(cards, i))  {
 					throw new ScumException("This is not a valid move. Please try again.");
 				}
 				System.out.println("You entered: ");
@@ -195,14 +291,20 @@ public class Game implements GameInterface {
 
 	@Override
 	public void start() {
-		int maxTurns = 5;
+		int maxTurns = 100;
 		for (int i = 0; !winnerExists() && i < maxTurns; i++) {
 			currentPlayer = i % numberOfPlayers;
 			giveTurn(currentPlayer);
+			if (skipNextTurnFlag) {
+				/* Increment here to skip the next player */
+				i++;
+				System.out.println("\nPlayer " + i + " has been skipped!");
+				skipNextTurnFlag = false;
+			}
 		}
 		if (winnerExists()) {
 			try {
-				System.out.println(winner() + " is President!");
+				System.out.println(winner().toString() + " is President!");
 			} catch (ScumException e) {
 				System.out.println(e.getMessage());
 			}

@@ -45,6 +45,11 @@ public class Player implements PlayerInterface{
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public String toString() {
+		return "Player " + id;
+	}
 
 	@Override
 	public void printHand() {

@@ -31,6 +31,14 @@ public class Hand implements HandInterface{
 		hand.sort(new CardComparator());
 
 	}
+	
+	public boolean contains(Card[] cards) {
+		for (Card card : cards) {
+			if (!hand.contains(card))
+				return false;
+		}
+		return true;
+	}
 
 	@Override
 	public void print() {
