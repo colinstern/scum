@@ -407,6 +407,7 @@ public class Game implements GameInterface {
 					autoclear();
 				}
 				System.out.println("Enter cards to play. For help, enter \"help\".");
+				players.get(i).printHand();
 				input = scanner.nextLine();
 				if (input.equals("pass")) {
 					players.get(i).setPassFlag(true);
