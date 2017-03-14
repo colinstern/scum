@@ -64,6 +64,7 @@ public class Pile implements PileInterface {
 		for (int i = pile.size() - 1; i >= 0; i--) {
 			System.out.println(pile.get(i));
 		}
+		System.out.println();
 
 	}
 	

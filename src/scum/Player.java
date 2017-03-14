@@ -9,9 +9,12 @@ public class Player implements PlayerInterface{
 	
 	private Hand hand;
 	
+	private boolean passFlag;
+	
 	public Player(int id) {
 		this.id = id;
 		this.hand = new Hand();
+		this.passFlag = false;
 	}
 	
 	@Override
@@ -26,6 +29,14 @@ public class Player implements PlayerInterface{
 	
 	public void setHand(Hand hand) {
 		this.hand = hand;
+	}
+	
+	public boolean getPassFlag() {
+		return passFlag;
+	}
+	
+	public void setPassFlag(boolean status) {
+		passFlag = status;
 	}
 
 	@Override
@@ -63,8 +74,7 @@ public class Player implements PlayerInterface{
 	public boolean hasWon() {
 		// TODO Auto-generated method stub
 		return false;
-	}
-	
+	}	
 	
 
 }

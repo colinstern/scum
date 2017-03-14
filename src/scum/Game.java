@@ -29,6 +29,8 @@ public class Game implements GameInterface {
 	private Card lastPlayedCard;
 	
 	private boolean skipNextTurnFlag;
+	
+	private int turnsWithoutPassFlagsCleared;
 	/**
 	 * Initializes the game with n players.
 	 */
@@ -45,6 +47,7 @@ public class Game implements GameInterface {
 		sizeOfLastMove = 0;
 		lastPlayedCard = null;
 		skipNextTurnFlag = false;
+		turnsWithoutPassFlagsCleared = 0;
 		//TODO	
 	}
 
@@ -307,6 +310,44 @@ public class Game implements GameInterface {
 		lastPlayedCard = cards[cards.length - 1];
 		return true;
 	}
+	
+	/**
+	 * Checks if all other players besides currentPlayer have set passFlags.
+	 * If they have, returns true. If they haven't,
+	 * returns false. If all players have set passFlags, returns true.
+	 * @param currentPlayer
+	 */
+	public boolean allOthersHavePassed(int currentPlayer) {
+		/* Start by checking next player. Stop before we check the current player */
+		for (int i = (currentPlayer + 1) % numberOfPlayers; i != currentPlayer; i = (i + 1) % numberOfPlayers) {
+			/* Check if player has passed */
+			if (!players.get(i).getPassFlag())
+				return false;
+		}
+		/* If current player has not passed, return true. If current player has passed, then all 
+		 * players have passed, and we return true to keep the game going */
+		return true;
+		
+	}
+	
+	/** 
+	 * Clears to let current player play whatever he wants. Resets all passFlags.
+	 */
+	public void autoclear() {
+		sizeOfLastMove = 0;
+		lastPlayedCard = null;
+		clearAllPassFlags();
+		System.out.println("\nAll other players have passed - clears to " + players.get(currentPlayer) + "!\n");
+	}
+	
+	/**
+	 * Clears each player's pass flag.
+	 */
+	public void clearAllPassFlags() {
+		for (Player player : players)
+			player.setPassFlag(false);
+		turnsWithoutPassFlagsCleared = 0;
+	}
 
 	@Override
 	public boolean isTurn(int playerId) {
@@ -358,10 +399,15 @@ public class Game implements GameInterface {
 		Card[] cards;
 		while (true) {
 			try {
+				if (allOthersHavePassed(i)) {
+					autoclear();
+				}
 				System.out.println("Enter cards to play. For help, enter \"help\".");
 				input = scanner.nextLine();
-				if (input.equals("pass"))
+				if (input.equals("pass")) {
+					players.get(i).setPassFlag(true);
 					break;
+				}
 				if (input.equals("hand")) {
 					players.get(i).printHand();
 					continue;
@@ -378,11 +424,11 @@ public class Game implements GameInterface {
 				try {
 					cards = castStringsToCards(tokens);
 				} catch (ScumException e) {
-					System.out.println(e.getMessage() + " Could not interpret the input. Please enter again.");
+					System.out.println(e.getMessage() + " Could not interpret the input. Please enter again.\n");
 					continue;
 				}
 				if (!isValidMove(cards, i))  {
-					throw new ScumException("This is not a valid move. Please try again.");
+					throw new ScumException("This is not a valid move. Please try again.\n");
 				}
 				makeMove(cards, i);
 				
@@ -407,6 +453,10 @@ public class Game implements GameInterface {
 				i++;
 				System.out.println("\nPlayer " + i % numberOfPlayers + " has been skipped!");
 				skipNextTurnFlag = false;
+			}
+			turnsWithoutPassFlagsCleared++;
+			if (turnsWithoutPassFlagsCleared >= numberOfPlayers) {
+				clearAllPassFlags();
 			}
 		}
 		if (winnerExists()) {
