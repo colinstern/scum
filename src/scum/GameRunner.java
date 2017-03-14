@@ -18,7 +18,7 @@ public class GameRunner {
 		while (true) {
 			try {
 				System.out.println("How many players?\n");
-				n = scanner.nextInt();
+				n = Integer.parseInt(scanner.next());
 				if ((n < 2) | (n > 10)) {
 					System.out.println("Please enter a number between 2 and 10.\n");
 					throw new Exception("Number is out of bounds.\n");
@@ -27,6 +27,7 @@ public class GameRunner {
 			} catch (InputMismatchException e) {
 				System.out.println("Please enter a number.\n");
 			} catch (Exception e) {
+				System.out.println();
 			}
 		}
 		

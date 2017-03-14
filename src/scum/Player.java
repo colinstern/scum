@@ -53,8 +53,8 @@ public class Player implements PlayerInterface{
 
 	@Override
 	public void printHand() {
-		hand.sort();
-		System.out.println("Player " + id + "'s hand:");
+		hand.numberSort();
+		System.out.println("\nPlayer " + id + "'s hand:");
 		hand.print();
 		
 	}

@@ -108,11 +108,21 @@ public class Card implements CardInterface {
 	public int compareTo(Card b) {
 		return Integer.compare(this.hash(), b.hash());
 	}
+	
+	public int compareNumberTo(Card b) {
+		return Integer.compare(this.getNumberAsInt(), b.getNumberAsInt());
+	}
 
 }
 
 class CardComparator implements Comparator<Card> {
 	public int compare(Card a, Card b) {
 		return a.compareTo(b);
+	}
+}
+
+class CardNumberComparator implements Comparator<Card> {
+	public int compare(Card a, Card b) {
+		return a.compareNumberTo(b);
 	}
 }

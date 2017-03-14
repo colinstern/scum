@@ -32,6 +32,10 @@ public class Hand implements HandInterface{
 
 	}
 	
+	public void numberSort() {
+		hand.sort(new CardNumberComparator());
+	}
+	
 	public boolean contains(Card[] cards) {
 		for (Card card : cards) {
 			if (!hand.contains(card))
@@ -44,7 +48,7 @@ public class Hand implements HandInterface{
 	public void print() {
 		for (Card card: hand) 
 			System.out.println(card);
-		System.out.println("Size of hand: " + getSize());
+		System.out.println("Size of hand: " + getSize() + "\n");
 
 	}
 

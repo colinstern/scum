@@ -46,17 +46,16 @@ public class Pile implements PileInterface {
 	 * @param howMany The number of most recently played cards to show. If this number is greater than the number of cards on the pile, the entire pile will be returned.
 	 * @return An array of the most recently played cards on the pile.
 	 */
-	public Card[] peekMany(int howMany) {
+	public ArrayList<Card> peekMany(int howMany) {
 		if (howMany > pile.size())
 			howMany = pile.size();
 		ArrayList<Card> cardsList = new ArrayList<Card>();
 		for (int i = 0; i < howMany; i++) {
 			cardsList.add(pile.pop());
 		}
-		Card[] cards = cardsList.toArray(new Card[cardsList.size()]);
-		for (Card card : cardsList)
-			pile.push(card);
-		return cards;
+		for (int j = cardsList.size() - 1; j >= 0; j--)
+			pile.push(cardsList.get(j));
+		return cardsList;
 	}
 
 	@Override
@@ -79,6 +78,13 @@ public class Pile implements PileInterface {
 	public void printLastMove() {
 		// TODO Somehow remember the last move
 
+	}
+	
+	/**
+	 * @return Size of the pile.
+	 */
+	public int size() {
+		return pile.size();
 	}
 
 	@Override
