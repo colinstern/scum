@@ -161,9 +161,13 @@ public class Game implements GameInterface {
 	 * cardsList has had the starting 2 removed.
 	 */
 	public boolean twoChecker(ArrayList<Card> cardsList) {
-		/* Check for an empty list */
+		/* Check for an empty list. A player played a 2 and then essentially passed */
 		if (cardsList.isEmpty()) {
 			System.out.println("\nCleared by " + players.get(currentPlayer) + "!");
+			/* Reset size of last move */
+			sizeOfLastMove = 0;
+			/* Null lastPlayedCard */
+			lastPlayedCard = null;
 			return true;
 		}
 		
