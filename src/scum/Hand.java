@@ -21,6 +21,10 @@ public class Hand implements HandInterface{
 		return hand.remove(card);
 	}
 	
+	public void remove(int index) {
+		hand.remove(index);
+	}
+	
 	@Override
 	public int getSize() {
 		return hand.size();

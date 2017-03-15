@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+import jdk.management.resource.internal.TotalResourceContext;
+
 /**
  * Implements the main game logic.
  * @author cost
@@ -35,6 +37,10 @@ public class Game implements GameInterface {
 	private ArrayList<Card> previousMove;
 	
 	private String errorMessage;
+	
+	private Player[] scoreboard;
+	
+	private int ithWinner;
 	/**
 	 * Initializes the game with n players.
 	 */
@@ -54,6 +60,7 @@ public class Game implements GameInterface {
 		turnsWithoutPassFlagsCleared = 0;
 		previousMove = null;
 		errorMessage = null; 
+		scoreboard = new Player[n];
 		//TODO	
 	}
 
@@ -107,57 +114,57 @@ public class Game implements GameInterface {
 	}
 
 	public boolean isValidMove(Card[] cards, Player id) {
-		/* Make an ArrayList from cards */
-		ArrayList<Card> cardsList = new ArrayList<Card>();
-		for (Card card : cards)
-			cardsList.add(card);
-		
-		/* Check if move is empty, trivially return true if so */
-		if (cardsList.isEmpty())
-			return true;
-		
-		/* Make sure player has cards he is playing */
-		if (!(id.getHand().contains(cards))) {
-			errorMessage = "Some of these cards are not in your hand.";
-			return false;
-		}
-		
-		/* If player is playing a 2 as first card, feed a list without the starting 2 to twoChecker */
-		if (cardsList.get(0).getNumberAsInt() == 2) {
-			return twoChecker(new ArrayList<Card> (cardsList.subList(1, cardsList.size())), id);
-		}
-		
-		/* Check for bombs */
-		if (bombChecker(cardsList)) {
-			System.out.println("\nBomb by " + id + "!");
-			/* Feed a list without the starting bomb to twoChecker */
-			return twoChecker(new ArrayList<Card> (cardsList.subList(4, cardsList.size())), id);
-		}
-		
-		/* Check for socials */
-		if (socialChecker(cardsList) > 0) {
-			System.out.println("\nSocial by " + id + "!");
-			/* Feed a list without the starting social to twoChecker */
-			return twoChecker(new ArrayList<Card> (cardsList.subList(socialChecker(cardsList), cardsList.size())), id);
-		}
-		
-		/* Normal play: Check that cards are all same number, greater or equal to last move,
-		 * and are following singles, doubles, etc. */
-		if (!checkNormalPlay(cardsList))
-			return false;
-		
-		/* Check for skips, and if found set a flag that will skip the next player's turn */
-		checkForSkips(cardsList);
-		
-		/* Set last played card */
-		lastPlayedCard = cardsList.get(cardsList.size() - 1);
-		
-		/* If you are starting the game you can set singles, doubles or triples */
-		if (sizeOfLastMove == 0) 
-			sizeOfLastMove = cardsList.size();
-		
-		/* Store this move */
-		previousMove = cardsList;
+//		/* Make an ArrayList from cards */
+//		ArrayList<Card> cardsList = new ArrayList<Card>();
+//		for (Card card : cards)
+//			cardsList.add(card);
+//		
+//		/* Check if move is empty, trivially return true if so */
+//		if (cardsList.isEmpty())
+//			return true;
+//		
+//		/* Make sure player has cards he is playing */
+//		if (!(id.getHand().contains(cards))) {
+//			errorMessage = "Some of these cards are not in your hand.";
+//			return false;
+//		}
+//		
+//		/* If player is playing a 2 as first card, feed a list without the starting 2 to twoChecker */
+//		if (cardsList.get(0).getNumberAsInt() == 2) {
+//			return twoChecker(new ArrayList<Card> (cardsList.subList(1, cardsList.size())), id);
+//		}
+//		
+//		/* Check for bombs */
+//		if (bombChecker(cardsList)) {
+//			System.out.println("\nBomb by " + id + "!");
+//			/* Feed a list without the starting bomb to twoChecker */
+//			return twoChecker(new ArrayList<Card> (cardsList.subList(4, cardsList.size())), id);
+//		}
+//		
+//		/* Check for socials */
+//		if (socialChecker(cardsList) > 0) {
+//			System.out.println("\nSocial by " + id + "!");
+//			/* Feed a list without the starting social to twoChecker */
+//			return twoChecker(new ArrayList<Card> (cardsList.subList(socialChecker(cardsList), cardsList.size())), id);
+//		}
+//		
+//		/* Normal play: Check that cards are all same number, greater or equal to last move,
+//		 * and are following singles, doubles, etc. */
+//		if (!checkNormalPlay(cardsList))
+//			return false;
+//		
+//		/* Check for skips, and if found set a flag that will skip the next player's turn */
+//		checkForSkips(cardsList);
+//		
+//		/* Set last played card */
+//		lastPlayedCard = cardsList.get(cardsList.size() - 1);
+//		
+//		/* If you are starting the game you can set singles, doubles or triples */
+//		if (sizeOfLastMove == 0) 
+//			sizeOfLastMove = cardsList.size();
+//		
+//		/* Store this move */
+//		previousMove = cardsList;
 		
 		return true;
 		
@@ -373,9 +380,9 @@ public class Game implements GameInterface {
 	 * returns false. If all players have set passFlags, returns true.
 	 * @param currentPlayer
 	 */
-	public boolean allOthersHavePassed(int currentPlayer) {
+	public boolean allOthersHavePassed(int currentPlayer, int numberOfActivePlayers) {
 		/* Start by checking next player. Stop before we check the current player */
-		for (int i = (currentPlayer + 1) % numberOfPlayers; i != currentPlayer; i = (i + 1) % numberOfPlayers) {
+		for (int i = (currentPlayer + 1) % numberOfActivePlayers; i != currentPlayer; i = (i + 1) % numberOfActivePlayers) {
 			/* Check if player has passed */
 			if (!players.get(i).getPassFlag())
 				return false;
@@ -442,6 +449,11 @@ public class Game implements GameInterface {
 	public void printHelp() {
 		System.out.println("\nCards must be comma-separated, like this: 3 of clubs, 3 of diamonds\nIf you do not wish to play a card, enter \"pass\". To see your hand, enter \"hand\". To see the pile, enter \"pile\".");
 	}
+	
+	public void removeAllCardsFromHand(Player id) {
+		for (int i = 0; i < id.getHand().getSize(); i++)
+			id.getHand().remove(i);
+	}
 
 	/**
 	 * Give player a i a turn.
@@ -455,7 +467,7 @@ public class Game implements GameInterface {
 		Card[] cards;
 		while (true) {
 			try {
-				if (allOthersHavePassed(indexOfPlayersArray)) {
+				if (allOthersHavePassed(indexOfPlayersArray, players.size())) {
 					autoclear();
 				}
 				System.out.println("Enter cards to play. For help, enter \"help\".");
@@ -493,6 +505,10 @@ public class Game implements GameInterface {
 						System.out.println(lastPlayedCard);
 					continue;
 				}
+				if (input.equals("remove")) {
+					removeAllCardsFromHand(id);
+					continue;
+				}
 				if (input.equals("help")) {
 					printHelp();
 					continue;
@@ -521,32 +537,89 @@ public class Game implements GameInterface {
 		} 
 		//scanner.close(); 
 	}
-
+	/** 
+	 * Gives turns. Recursively plays with n-1 players once a player wins. Stops game when there is only
+	 * 1 player left.
+	 * @param n Number of players.
+	 */
 	public void playWithNPlayers(int n) {
-		
-	}
-
-	@Override
-	public void start() {
+		/* Stop play when only one player is left. */
+		if (n < 2) {
+			System.out.println(players.get(0) + " is Scum!");
+			scoreboard[ithWinner] = players.get(0);
+			return;
+		}
+		/* Play the game until someone has an empty hand */
 		for (int i = 0; !winnerExists(); i++) {
-			currentPlayer = i % numberOfPlayers;
+			currentPlayer = i % n;
 			giveTurn(players.get(currentPlayer), currentPlayer);
-			players.get((currentPlayer + 1) % numberOfPlayers).setPassFlag(false);
+			players.get((currentPlayer + 1) % n).setPassFlag(false);
 			if (skipNextTurnFlag) {
 				/* Increment here to skip the next player */
 				i++;
-				System.out.println("\nPlayer " + i % numberOfPlayers + " has been skipped!");
+				System.out.println("\n" + players.get(currentPlayer) + " has been skipped!");
 				skipNextTurnFlag = false;
 			}
 		}
+		/* Assign the player with an empty hand to the scoreboard array and print their rank */
 		if (winnerExists()) {
 			try {
-				System.out.println(winner().toString() + " is President!");
+				/* Announce winner */
+				String winnerMessage = winner().toString() + " is ";
+				int viceScum = numberOfPlayers - 2;
+				int scum = numberOfPlayers - 1;
+				if (ithWinner == 0)
+					winnerMessage += "President!";
+				else if (ithWinner == 1)
+					winnerMessage += "Vice President!";
+				else if (ithWinner == viceScum)
+					winnerMessage += "Vice Scum!";
+				else if (ithWinner == scum)
+					winnerMessage += "Scum!";
+				else 
+					winnerMessage += "Noodge!";
+				
+				System.out.println(winnerMessage);
+				/* Assign winner to scoreboard array */
+				scoreboard[ithWinner] = winner();
+				/* Count how many winners there have been to aid insertion into the scoreboard */
+				ithWinner++;
+				/* Remove winner from active players */
+				players.remove(winner());
+				/* Continue playing with remaining players */
+				playWithNPlayers(n-1);
 			} catch (ScumException e) {
 				System.out.println(e.getMessage());
 			}
 		}
+	}
+	
+	public void printScoreboard() {
+		System.out.println("Scoreboard: ");
+		for (int i = 0; i < scoreboard.length; i++) {
+			String winnerMessage = scoreboard[i] + " is ";
+			int viceScum = numberOfPlayers - 2;
+			int scum = numberOfPlayers - 1;
+			if (i == 0)
+				winnerMessage += "President";
+			else if (i == 1)
+				winnerMessage += "Vice President";
+			else if (i == viceScum)
+				winnerMessage += "Vice Scum";
+			else if (i == scum)
+				winnerMessage += "Scum";
+			else 
+				winnerMessage += "Noodge";
+			
+			System.out.println(winnerMessage);
+		}
+	}
+
+	@Override
+	public void start() {
+		playWithNPlayers(numberOfPlayers);
 		System.out.println("Game over.\n");
+		printScoreboard();
 	}
 }
 
