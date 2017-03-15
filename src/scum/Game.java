@@ -114,57 +114,57 @@ public class Game implements GameInterface {
 	}
 
 	public boolean isValidMove(Card[] cards, Player id) {
-//		/* Make an ArrayList from cards */
-//		ArrayList<Card> cardsList = new ArrayList<Card>();
-//		for (Card card : cards)
-//			cardsList.add(card);
-//		
-//		/* Check if move is empty, trivially return true if so */
-//		if (cardsList.isEmpty())
-//			return true;
-//		
-//		/* Make sure player has cards he is playing */
-//		if (!(id.getHand().contains(cards))) {
-//			errorMessage = "Some of these cards are not in your hand.";
-//			return false;
-//		}
-//		
-//		/* If player is playing a 2 as first card, feed a list without the starting 2 to twoChecker */
-//		if (cardsList.get(0).getNumberAsInt() == 2) {
-//			return twoChecker(new ArrayList<Card> (cardsList.subList(1, cardsList.size())), id);
-//		}
-//		
-//		/* Check for bombs */
-//		if (bombChecker(cardsList)) {
-//			System.out.println("\nBomb by " + id + "!");
-//			/* Feed a list without the starting bomb to twoChecker */
-//			return twoChecker(new ArrayList<Card> (cardsList.subList(4, cardsList.size())), id);
-//		}
-//		
-//		/* Check for socials */
-//		if (socialChecker(cardsList) > 0) {
-//			System.out.println("\nSocial by " + id + "!");
-//			/* Feed a list without the starting social to twoChecker */
-//			return twoChecker(new ArrayList<Card> (cardsList.subList(socialChecker(cardsList), cardsList.size())), id);
-//		}
-//		
-//		/* Normal play: Check that cards are all same number, greater or equal to last move,
-//		 * and are following singles, doubles, etc. */
-//		if (!checkNormalPlay(cardsList))
-//			return false;
-//		
-//		/* Check for skips, and if found set a flag that will skip the next player's turn */
-//		checkForSkips(cardsList);
-//		
-//		/* Set last played card */
-//		lastPlayedCard = cardsList.get(cardsList.size() - 1);
-//		
-//		/* If you are starting the game you can set singles, doubles or triples */
-//		if (sizeOfLastMove == 0) 
-//			sizeOfLastMove = cardsList.size();
-//		
-//		/* Store this move */
-//		previousMove = cardsList;
+		/* Make an ArrayList from cards */
+		ArrayList<Card> cardsList = new ArrayList<Card>();
+		for (Card card : cards)
+			cardsList.add(card);
+		
+		/* Check if move is empty, trivially return true if so */
+		if (cardsList.isEmpty())
+			return true;
+		
+		/* Make sure player has cards he is playing */
+		if (!(id.getHand().contains(cards))) {
+			errorMessage = "Some of these cards are not in your hand.";
+			return false;
+		}
+		
+		/* If player is playing a 2 as first card, feed a list without the starting 2 to twoChecker */
+		if (cardsList.get(0).getNumberAsInt() == 2) {
+			return twoChecker(new ArrayList<Card> (cardsList.subList(1, cardsList.size())), id);
+		}
+		
+		/* Check for bombs */
+		if (bombChecker(cardsList)) {
+			System.out.println("\nBomb by " + id + "!");
+			/* Feed a list without the starting bomb to twoChecker */
+			return twoChecker(new ArrayList<Card> (cardsList.subList(4, cardsList.size())), id);
+		}
+		
+		/* Check for socials */
+		if (socialChecker(cardsList) > 0) {
+			System.out.println("\nSocial by " + id + "!");
+			/* Feed a list without the starting social to twoChecker */
+			return twoChecker(new ArrayList<Card> (cardsList.subList(socialChecker(cardsList), cardsList.size())), id);
+		}
+		
+		/* Normal play: Check that cards are all same number, greater or equal to last move,
+		 * and are following singles, doubles, etc. */
+		if (!checkNormalPlay(cardsList))
+			return false;
+		
+		/* Check for skips, and if found set a flag that will skip the next player's turn */
+		checkForSkips(cardsList);
+		
+		/* Set last played card */
+		lastPlayedCard = cardsList.get(cardsList.size() - 1);
+		
+		/* If you are starting the game you can set singles, doubles or triples */
+		if (sizeOfLastMove == 0) 
+			sizeOfLastMove = cardsList.size();
+		
+		/* Store this move */
+		previousMove = cardsList;
 		
 		return true;
 		
@@ -503,10 +503,6 @@ public class Game implements GameInterface {
 				if (input.equals("card")) {
 					if (lastPlayedCard != null)
 						System.out.println(lastPlayedCard);
-					continue;
-				}
-				if (input.equals("remove")) {
-					removeAllCardsFromHand(id);
 					continue;
 				}
 				if (input.equals("help")) {
