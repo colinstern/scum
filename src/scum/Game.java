@@ -223,8 +223,12 @@ public class Game implements GameInterface {
 			/* Set last played card */
 			lastPlayedCard = cardsList.get(cardsList.size() - 1);
 			
+			
 			/* Set singles, doubles or triples */
 			sizeOfLastMove = cardsList.size();
+			
+			/* Store this move */
+			previousMove = cardsList;
 			
 			return true;
 		}
@@ -447,7 +451,7 @@ public class Game implements GameInterface {
 	}
 	
 	public void printHelp() {
-		System.out.println("\nCards must be comma-separated, like this: 3 of clubs, 3 of diamonds\nIf you do not wish to play a card, enter \"pass\". To see your hand, enter \"hand\". To see the pile, enter \"pile\".");
+		System.out.println("\nCards must be comma-separated, like this: 3 of clubs, 3 of diamonds\nIf you do not wish to play a card, enter \"pass\". To see the previous move, enter \"prev\".");
 	}
 	
 	public void removeAllCardsFromHand(Player id) {

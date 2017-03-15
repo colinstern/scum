@@ -52,7 +52,7 @@ public class Hand implements HandInterface{
 	public void print() {
 		for (Card card: hand) 
 			System.out.println(card);
-		System.out.println("Size of hand: " + getSize() + "\n");
+		System.out.println("Size: " + getSize() + "\n");
 
 	}
 
