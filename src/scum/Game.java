@@ -106,8 +106,7 @@ public class Game implements GameInterface {
 		return winner;
 	}
 
-	@Override
-	public boolean isValidMove(Card[] cards, int i) {
+	public boolean isValidMove(Card[] cards, Player id) {
 		/* Make an ArrayList from cards */
 		ArrayList<Card> cardsList = new ArrayList<Card>();
 		for (Card card : cards)
@@ -118,28 +117,28 @@ public class Game implements GameInterface {
 			return true;
 		
 		/* Make sure player has cards he is playing */
-		if (!(players.get(i).getHand().contains(cards))) {
+		if (!(id.getHand().contains(cards))) {
 			errorMessage = "Some of these cards are not in your hand.";
 			return false;
 		}
 		
 		/* If player is playing a 2 as first card, feed a list without the starting 2 to twoChecker */
 		if (cardsList.get(0).getNumberAsInt() == 2) {
-			return twoChecker(new ArrayList<Card> (cardsList.subList(1, cardsList.size())));
+			return twoChecker(new ArrayList<Card> (cardsList.subList(1, cardsList.size())), id);
 		}
 		
 		/* Check for bombs */
 		if (bombChecker(cardsList)) {
-			System.out.println("\nBomb by " + players.get(i) + "!");
+			System.out.println("\nBomb by " + id + "!");
 			/* Feed a list without the starting bomb to twoChecker */
-			return twoChecker(new ArrayList<Card> (cardsList.subList(4, cardsList.size())));
+			return twoChecker(new ArrayList<Card> (cardsList.subList(4, cardsList.size())), id);
 		}
 		
 		/* Check for socials */
 		if (socialChecker(cardsList) > 0) {
-			System.out.println("\nSocial by " + players.get(i) + "!");
+			System.out.println("\nSocial by " + id + "!");
 			/* Feed a list without the starting social to twoChecker */
-			return twoChecker(new ArrayList<Card> (cardsList.subList(socialChecker(cardsList), cardsList.size())));
+			return twoChecker(new ArrayList<Card> (cardsList.subList(socialChecker(cardsList), cardsList.size())), id);
 		}
 		
 		/* Normal play: Check that cards are all same number, greater or equal to last move,
@@ -175,10 +174,10 @@ public class Game implements GameInterface {
 	 * A recursive checker for valid moves started by 2's.
 	 * cardsList has had the starting 2 removed.
 	 */
-	public boolean twoChecker(ArrayList<Card> cardsList) {
+	public boolean twoChecker(ArrayList<Card> cardsList, Player id) {
 		/* Check for an empty list. A player played a 2 and then essentially passed */
 		if (cardsList.isEmpty()) {
-			System.out.println("\nCleared by " + players.get(currentPlayer) + "!");
+			System.out.println("\nCleared by " + id + "!");
 			/* Reset size of last move */
 			sizeOfLastMove = 0;
 			/* Null lastPlayedCard */
@@ -189,12 +188,12 @@ public class Game implements GameInterface {
 		/* Case 1: Check if first card is a 2 */
 		if (cardsList.get(0).getNumberAsInt() == 2)
 			/* check if this 2 move is valid. Feed list without starting 2 to twoChecker */
-			return twoChecker(new ArrayList<Card> (cardsList.subList(1, cardsList.size())));
+			return twoChecker(new ArrayList<Card> (cardsList.subList(1, cardsList.size())), id);
 		
 		/* Case 2: Check if the list is started by a bomb */
 		if (bombChecker(cardsList)) {
 			/* Check the move after the bomb */
-			twoChecker(new ArrayList<Card> (cardsList.subList(4, cardsList.size())));
+			twoChecker(new ArrayList<Card> (cardsList.subList(4, cardsList.size())), id);
 		}
 		
 		/* Case 3: List is not started by a 2 or a bomb, and is not empty */
@@ -212,7 +211,7 @@ public class Game implements GameInterface {
 			if (!checkNormalPlay(cardsList))
 				return false;
 			
-			System.out.println("\nCleared by " + players.get(currentPlayer) + "!");
+			System.out.println("\nCleared by " + id + "!");
 			
 			/* Set last played card */
 			lastPlayedCard = cardsList.get(cardsList.size() - 1);
@@ -360,10 +359,9 @@ public class Game implements GameInterface {
 	}
 	
 	
-	@Override
-	public boolean makeMove(Card[] cards, int i) {
+	public boolean makeMove(Card[] cards, Player id) {
 		for (Card card : cards) {
-			players.get(i).getHand().remove(card);
+			id.getHand().remove(card);
 			pile.add(card);
 		}
 		return true;
@@ -449,26 +447,26 @@ public class Game implements GameInterface {
 	 * Give player a i a turn.
 	 * @param i The player who gets a turn
 	 */
-	public void giveTurn(int i) {
-		System.out.printf("\nPlayer %d, it is your turn.\n", i);
+	public void giveTurn(Player id, int indexOfPlayersArray) {
+		System.out.printf("\nPlayer %d, it is your turn.\n", id.getId());
 		Scanner scanner = new Scanner(System.in);
 		String input;
 		String[] tokens;
 		Card[] cards;
 		while (true) {
 			try {
-				if (allOthersHavePassed(i)) {
+				if (allOthersHavePassed(indexOfPlayersArray)) {
 					autoclear();
 				}
 				System.out.println("Enter cards to play. For help, enter \"help\".");
-				players.get(i).printHand();
+				id.printHand();
 				input = scanner.nextLine();
 				if (input.equals("pass")) {
-					players.get(i).setPassFlag(true);
+					id.setPassFlag(true);
 					break;
 				}
 				if (input.equals("hand")) {
-					players.get(i).printHand();
+					id.printHand();
 					continue;
 				}
 				if (input.equals("pile")) {
@@ -506,14 +504,14 @@ public class Game implements GameInterface {
 					System.out.println(e.getMessage() + " Could not interpret the input. Please enter again.\n");
 					continue;
 				}
-				if (!isValidMove(cards, i))  {
+				if (!isValidMove(cards, id))  {
 					if (errorMessage != null) {
 						System.out.println(errorMessage + "\n");
 						errorMessage = null;
 					}
 					throw new ScumException("This is not a valid move. Please try again.\n");
 				}
-				makeMove(cards, i);
+				makeMove(cards, id);
 				
 			} catch (ScumException e) {
 				System.out.println(e.getMessage());
@@ -524,13 +522,15 @@ public class Game implements GameInterface {
 		//scanner.close(); 
 	}
 
+	public void playWithNPlayers(int n) {
+		
+	}
 
 	@Override
 	public void start() {
-		int maxTurns = 100;
 		for (int i = 0; !winnerExists(); i++) {
 			currentPlayer = i % numberOfPlayers;
-			giveTurn(currentPlayer);
+			giveTurn(players.get(currentPlayer), currentPlayer);
 			players.get((currentPlayer + 1) % numberOfPlayers).setPassFlag(false);
 			if (skipNextTurnFlag) {
 				/* Increment here to skip the next player */
@@ -545,8 +545,6 @@ public class Game implements GameInterface {
 			} catch (ScumException e) {
 				System.out.println(e.getMessage());
 			}
-		} else {
-			System.out.println("Max turns exceeded.");
 		}
 		System.out.println("Game over.\n");
 	}

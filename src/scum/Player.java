@@ -57,6 +57,14 @@ public class Player implements PlayerInterface{
 		
 	}
 	
+	/**
+	 * Return this player's id.
+	 * @return id
+	 */
+	public int getId() {
+		return id;
+	}
+	
 	@Override
 	public String toString() {
 		return "Player " + id;

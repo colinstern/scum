@@ -25,7 +25,7 @@ public interface GameInterface {
 	 * If not, tell the player to make a valid move.
 	 * @return Whether the move is valid or not.
 	 */
-	public boolean isValidMove(Card[] cards, int i);
+	public boolean isValidMove(Card[] cards, Player id);
 	
 	/**
 	 * Checks if it is the given player's turn.
@@ -40,7 +40,7 @@ public interface GameInterface {
 	 * @param i Player id
 	 * @return true if move is successful, false otherwise
 	 */
-	public boolean makeMove(Card[] cards, int i);
+	public boolean makeMove(Card[] cards, Player id);
 	
 	/**
 	 * Starts the game. Manages the players turns and the game runtime.
