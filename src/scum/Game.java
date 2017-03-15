@@ -602,9 +602,10 @@ public class Game implements GameInterface {
 			int scum = numberOfPlayers - 1;
 			if (i == 0)
 				winnerMessage += "President";
-			else if (i == 1)
+			/* This special condition prevents a bug when numberOfPlayers is 2 */
+			else if ((numberOfPlayers > 2) && (i == 1))
 				winnerMessage += "Vice President";
-			else if (i == viceScum)
+			else if ((numberOfPlayers > 2) && (i == viceScum))
 				winnerMessage += "Vice Scum";
 			else if (i == scum)
 				winnerMessage += "Scum";
