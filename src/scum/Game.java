@@ -31,6 +31,10 @@ public class Game implements GameInterface {
 	private boolean skipNextTurnFlag;
 	
 	private int turnsWithoutPassFlagsCleared;
+	
+	private ArrayList<Card> previousMove;
+	
+	private String errorMessage;
 	/**
 	 * Initializes the game with n players.
 	 */
@@ -48,6 +52,8 @@ public class Game implements GameInterface {
 		lastPlayedCard = null;
 		skipNextTurnFlag = false;
 		turnsWithoutPassFlagsCleared = 0;
+		previousMove = null;
+		errorMessage = null; 
 		//TODO	
 	}
 
@@ -112,8 +118,10 @@ public class Game implements GameInterface {
 			return true;
 		
 		/* Make sure player has cards he is playing */
-		if (!(players.get(i).getHand().contains(cards)))
-				return false;
+		if (!(players.get(i).getHand().contains(cards))) {
+			errorMessage = "Some of these cards are not in your hand.";
+			return false;
+		}
 		
 		/* If player is playing a 2 as first card, feed a list without the starting 2 to twoChecker */
 		if (cardsList.get(0).getNumberAsInt() == 2) {
@@ -144,6 +152,13 @@ public class Game implements GameInterface {
 		
 		/* Set last played card */
 		lastPlayedCard = cardsList.get(cardsList.size() - 1);
+		
+		/* If you are starting the game you can set singles, doubles or triples */
+		if (sizeOfLastMove == 0) 
+			sizeOfLastMove = cardsList.size();
+		
+		/* Store this move */
+		previousMove = cardsList;
 		
 		return true;
 		
@@ -193,8 +208,19 @@ public class Game implements GameInterface {
 			sizeOfLastMove = 0;
 			/* Null lastPlayedCard so we can allow the 2 move */
 			lastPlayedCard = null;
+			/* Check normal play rules */
+			if (!checkNormalPlay(cardsList))
+				return false;
+			
 			System.out.println("\nCleared by " + players.get(currentPlayer) + "!");
-			return checkNormalPlay(cardsList);
+			
+			/* Set last played card */
+			lastPlayedCard = cardsList.get(cardsList.size() - 1);
+			
+			/* Set singles, doubles or triples */
+			sizeOfLastMove = cardsList.size();
+			
+			return true;
 		}
 	}
 	
@@ -210,6 +236,9 @@ public class Game implements GameInterface {
 		/* There must be a total of 4 cards to make a social */
 		if ((cardsList.size() + pile.size()) < 4)
 				return 0;
+		
+		if (cardsList.isEmpty() || pile.isEmpty())
+			return 0;
 		
 		/* Count how many cards on the pile have same number */
 		ArrayList<Card> pilePeekFour = pile.peekMany(4);
@@ -258,7 +287,7 @@ public class Game implements GameInterface {
 			return false;
 		
 		/* Check if first 4 cards have same number */
-		return areCardsAllSameNumber(new ArrayList<Card> (cardsList.subList(0, 3)));
+		return areCardsAllSameNumber(new ArrayList<Card> (cardsList.subList(0, 4)));
 	}
 	
 	
@@ -282,18 +311,44 @@ public class Game implements GameInterface {
 		if (cardsList.isEmpty())
 			return true;
 		/* Make sure cards are all same number */
-		if (!areCardsAllSameNumber(cardsList))
+		if (!areCardsAllSameNumber(cardsList)) {
+			errorMessage = "Not all cards are the same number.";
 			return false;
+		}
 		/* Make sure cards are not less than previous move */
-		if (lastPlayedCard != null && cardsList.get(0).getNumberAsInt() < lastPlayedCard.getNumberAsInt())
+		if (lastPlayedCard != null && cardsList.get(0).getNumberAsInt() < lastPlayedCard.getNumberAsInt()) {
+			errorMessage = "Cards in your move are less than the previous move.";
 			return false; 
+		}
 		/* Make sure singles, doubles or triples is maintained */
-		if (sizeOfLastMove != 0 && cardsList.size() != sizeOfLastMove)
+		if (sizeOfLastMove != 0 && cardsList.size() != sizeOfLastMove) {
+			errorMessage = "You played ";
+			switch (cardsList.size()) {
+			case (1) :
+				errorMessage += "singles";
+				break;
+			case (2) :
+				errorMessage += "doubles";
+				break;
+			case (3) :
+				errorMessage += "triples";
+			}
+			errorMessage += "; you should have played ";
+			switch (sizeOfLastMove) {
+			case (1) :
+				errorMessage += "singles";
+				break;
+			case (2) :
+				errorMessage += "doubles";
+				break;
+			case (3) :
+				errorMessage += "triples";
+			}
+			errorMessage += ".";
+			
 			return false;
-		/* If you are starting the game or just played a 2, bomb or social, you can set singles, doubles or triples */
-		if (sizeOfLastMove == 0) 
-			sizeOfLastMove = cardsList.size();
-		
+		}
+
 		return true;
 	}
 	
@@ -311,7 +366,6 @@ public class Game implements GameInterface {
 			players.get(i).getHand().remove(card);
 			pile.add(card);
 		}
-		lastPlayedCard = cards[cards.length - 1];
 		return true;
 	}
 	
@@ -329,8 +383,8 @@ public class Game implements GameInterface {
 				return false;
 		}
 		/* If current player has not passed, return true. If current player has passed, then all 
-		 * players have passed, and we return true to keep the game going */
-		return true;
+		 * players have passed. However, we return false */
+		return (!players.get(currentPlayer).getPassFlag());
 		
 	}
 	
@@ -421,6 +475,26 @@ public class Game implements GameInterface {
 					pile.print();
 					continue;
 				}
+				if (input.equals("prev")) {
+					if (previousMove == null) {
+						System.out.println("No previous move to display.\n");
+						continue;
+					}
+					System.out.println("Previous move:");
+					for (Card card : previousMove)
+						System.out.println(card);
+					System.out.println();
+					continue;
+				}
+				if (input.equals("size")) {
+					System.out.println(sizeOfLastMove);
+					continue;
+				}
+				if (input.equals("card")) {
+					if (lastPlayedCard != null)
+						System.out.println(lastPlayedCard);
+					continue;
+				}
 				if (input.equals("help")) {
 					printHelp();
 					continue;
@@ -433,6 +507,10 @@ public class Game implements GameInterface {
 					continue;
 				}
 				if (!isValidMove(cards, i))  {
+					if (errorMessage != null) {
+						System.out.println(errorMessage + "\n");
+						errorMessage = null;
+					}
 					throw new ScumException("This is not a valid move. Please try again.\n");
 				}
 				makeMove(cards, i);
@@ -450,18 +528,15 @@ public class Game implements GameInterface {
 	@Override
 	public void start() {
 		int maxTurns = 100;
-		for (int i = 0; !winnerExists() && i < maxTurns; i++) {
+		for (int i = 0; !winnerExists(); i++) {
 			currentPlayer = i % numberOfPlayers;
 			giveTurn(currentPlayer);
+			players.get((currentPlayer + 1) % numberOfPlayers).setPassFlag(false);
 			if (skipNextTurnFlag) {
 				/* Increment here to skip the next player */
 				i++;
 				System.out.println("\nPlayer " + i % numberOfPlayers + " has been skipped!");
 				skipNextTurnFlag = false;
-			}
-			turnsWithoutPassFlagsCleared++;
-			if (turnsWithoutPassFlagsCleared >= numberOfPlayers) {
-				clearAllPassFlags();
 			}
 		}
 		if (winnerExists()) {
