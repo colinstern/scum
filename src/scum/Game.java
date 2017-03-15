@@ -66,7 +66,7 @@ public class Game implements GameInterface {
 
 	private void initializePlayers(int n) {
 		for (int i = 0; i < n; i++) {
-			players.add(i, new Player(i));
+			players.add(i, new Player(i + 1));
 		}
 	}
 
@@ -542,7 +542,7 @@ public class Game implements GameInterface {
 	 * 1 player left.
 	 * @param n Number of players.
 	 */
-	public void playWithNPlayers(int n) {
+	public void playWithNPlayers(int n, int startIndex) {
 		/* Stop play when only one player is left. */
 		if (n < 2) {
 			System.out.println(players.get(0) + " is Scum!");
@@ -550,8 +550,10 @@ public class Game implements GameInterface {
 			return;
 		}
 		/* Play the game until someone has an empty hand */
-		for (int i = 0; !winnerExists(); i++) {
+		int index = 0;
+		for (int i = startIndex; !winnerExists(); i++) {
 			currentPlayer = i % n;
+			index = currentPlayer;
 			giveTurn(players.get(currentPlayer), currentPlayer);
 			players.get((currentPlayer + 1) % n).setPassFlag(false);
 			if (skipNextTurnFlag) {
@@ -586,8 +588,12 @@ public class Game implements GameInterface {
 				ithWinner++;
 				/* Remove winner from active players */
 				players.remove(winner());
-				/* Continue playing with remaining players */
-				playWithNPlayers(n-1);
+				/* Continue playing with remaining players. Keep track of where we left off */
+				if ((index + 1) % n == 0)
+					index = 0;
+				else
+					index = index % (n - 1);
+				playWithNPlayers(n-1, index);
 			} catch (ScumException e) {
 				System.out.println(e.getMessage());
 			}
@@ -618,7 +624,7 @@ public class Game implements GameInterface {
 
 	@Override
 	public void start() {
-		playWithNPlayers(numberOfPlayers);
+		playWithNPlayers(numberOfPlayers, 0);
 		System.out.println("Game over.\n");
 		printScoreboard();
 	}
