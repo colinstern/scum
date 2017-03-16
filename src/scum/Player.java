@@ -11,10 +11,13 @@ public class Player implements PlayerInterface{
 	
 	private boolean passFlag;
 	
+	private boolean isTurn;
+	
 	public Player(int id) {
 		this.id = id;
 		this.hand = new Hand();
 		this.passFlag = false;
+		this.isTurn = false;
 	}
 	
 	@Override
@@ -37,6 +40,14 @@ public class Player implements PlayerInterface{
 	
 	public void setPassFlag(boolean status) {
 		passFlag = status;
+	}
+	
+	public boolean isTurn() {
+		return isTurn;
+	}
+	
+	public void setIsTurn(boolean set) {
+		isTurn = set;
 	}
 
 	@Override

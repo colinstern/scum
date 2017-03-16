@@ -1,11 +1,9 @@
 package scum;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.InputMismatchException;
 import java.util.Scanner;
-
-import jdk.management.resource.internal.TotalResourceContext;
+import java.net.*;
+import java.io.*;
 
 /**
  * Implements the main game logic.
@@ -32,8 +30,6 @@ public class Game implements GameInterface {
 	
 	private boolean skipNextTurnFlag;
 	
-	private int turnsWithoutPassFlagsCleared;
-	
 	private ArrayList<Card> previousMove;
 	
 	private String errorMessage;
@@ -49,15 +45,19 @@ public class Game implements GameInterface {
 		deck.shuffle();
 		players = new ArrayList<Player>();
 		idCount = 0;
-		initializePlayers(n);
+		try {
+			initializeNetworkedPlayers(n);
+		} catch (IOException e) {
+			System.err.println("Unable to add players to game.");
+			e.printStackTrace();
+			System.exit(-1);
+		}
 		initializeHands(n);
 		pile = new Pile();
 		currentPlayer = 0;
 		numberOfPlayers = n;
 		sizeOfLastMove = 0;
 		lastPlayedCard = null;
-		skipNextTurnFlag = false;
-		turnsWithoutPassFlagsCleared = 0;
 		previousMove = null;
 		errorMessage = null; 
 		scoreboard = new Player[n];
@@ -68,6 +68,20 @@ public class Game implements GameInterface {
 		for (int i = 0; i < n; i++) {
 			players.add(i, new Player(i + 1));
 		}
+	}
+	
+	private void initializeNetworkedPlayers(int n) throws IOException {
+        int portNumber = 4444;
+         
+        try (ServerSocket serverSocket = new ServerSocket(portNumber)) { 
+        	/* Accept new players until n players have joined */
+            while (players.size() < n) {
+                new MultiServerThread(serverSocket.accept(), players).start();
+            }
+        } catch (IOException e) {
+            System.err.println("Could not listen on port " + portNumber);
+            System.exit(-1);
+        }
 	}
 
 	/**
@@ -413,7 +427,6 @@ public class Game implements GameInterface {
 	public void clearAllPassFlags() {
 		for (Player player : players)
 			player.setPassFlag(false);
-		turnsWithoutPassFlagsCleared = 0;
 	}
 
 	@Override
@@ -554,7 +567,11 @@ public class Game implements GameInterface {
 		for (int i = startIndex; !winnerExists(); i++) {
 			currentPlayer = i % n;
 			index = currentPlayer;
+			/* Set flag so player knows it is his turn */
+			players.get(currentPlayer).setIsTurn(true);
 			giveTurn(players.get(currentPlayer), currentPlayer);
+			/* Redundantly make sure player's turn is over */
+			players.get(currentPlayer).setIsTurn(false);
 			players.get((currentPlayer + 1) % n).setPassFlag(false);
 			if (skipNextTurnFlag) {
 				/* Increment here to skip the next player */
