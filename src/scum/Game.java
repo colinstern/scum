@@ -75,17 +75,36 @@ public class Game implements GameInterface {
          
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) { 
         	/* Accept new players until n players have joined */
-        	int i = 0;
-            while ((players.size() < n - 1)) {
+        	//i helps in debugging the number of connections
+        	int i = 0; 
+            while ((players.size() < n)) {
                 new MultiServerThread(serverSocket.accept(), players).start();
                 i++;
+                /* Allows client time to add to players */
+                Thread.sleep(100);
             }
         } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);
             System.exit(-1);
+        } catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        //Wait up to a second for clients to connect, checking every 100ms
+        int j = 0;
+        while (players.size() < n) {
+        	if (j > 10) {
+        		System.err.println("Error in connecting clients.");
+        		System.exit(-1);
+        	}
+        	j++;
+        	try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
-        //Wait for clients to connect
-        while (players.size() < n);
 	}
 
 	/**
@@ -433,6 +452,15 @@ public class Game implements GameInterface {
 		for (Player player : players)
 			player.setPassFlag(false);
 	}
+	
+	/** 
+	 * Sends message to all players
+	 */
+	public void announce(String message) {
+		for (Player player : players) {
+			player.sendMessageToClient(message);
+		}
+	}
 
 	@Override
 	public boolean isTurn(int playerId) {
@@ -496,6 +524,15 @@ public class Game implements GameInterface {
 		}
 		return sb.toString();
 	}
+	
+	/**
+	 * Sets a flag for each player to notify them that the game is over. 
+	 */
+	public void setGameOver() {
+		for (Player player : players) {
+			player.setIsGameOver(true);
+		}
+	}
 
 	/**
 	 * Give player a i a turn.
@@ -512,37 +549,50 @@ public class Game implements GameInterface {
 				}
 				/* Send message to client */
 				id.sendMessageToClient("Enter cards to play. For help, enter \"help\".\n" + id.returnHand());
+				/* Print message on server-side for game status purposes */
+				System.out.println("Enter cards to play. For help, enter \"help\".\n" + id.returnHand());
 				/* Wait for message from client */
-				while(!id.isMessageToGame());
+				while(!id.isMessageToGame()) {
+					Thread.sleep(100);
+				}
 				/* Use message from client */
 				input = id.getMessageToGame();
+				if (input == null)
+					continue;
 				if (input.equals("pass")) {
 					id.setPassFlag(true);
 					break;
 				}
 				if (input.equals("hand")) {
 					id.sendMessageToClient(id.returnHand());
+					System.out.println(id.returnHand());
 					continue;
 				}
 				if (input.equals("pile")) {
 					id.sendMessageToClient(pile.returnPrint());
+					System.out.println(pile.returnPrint());
 					continue;
 				}
 				if (input.equals("prev")) {
 					id.sendMessageToClient(returnPrintPrev());
+					System.out.println(returnPrintPrev());
 					continue;
 				}
 				if (input.equals("size")) {
 					id.sendMessageToClient("" + sizeOfLastMove);
+					System.out.println("" + sizeOfLastMove);
 					continue;
 				}
 				if (input.equals("card")) {
-					if (lastPlayedCard != null)
+					if (lastPlayedCard != null) {
 						id.sendMessageToClient("" + lastPlayedCard);
+						System.out.println("" + lastPlayedCard);
+					}
 					continue;
 				}
 				if (input.equals("help")) {
 					id.sendMessageToClient(returnPrintHelp());
+					System.out.println(returnPrintHelp());
 					continue;
 				}
 				tokens = input.split(", ");
@@ -550,11 +600,13 @@ public class Game implements GameInterface {
 					cards = castStringsToCards(tokens);
 				} catch (ScumException e) {
 					id.sendMessageToClient(e.getMessage() + " Could not interpret the input. Please enter again.\n");
+					System.out.println(e.getMessage() + " Could not interpret the input. Please enter again.\n");
 					continue;
 				}
 				if (!isValidMove(cards, id))  {
 					if (errorMessage != null) {
 						id.sendMessageToClient(errorMessage + "\n");
+						System.out.println(errorMessage + "\n");
 						errorMessage = null;
 					}
 					throw new ScumException("This is not a valid move. Please try again.\n");
@@ -563,7 +615,11 @@ public class Game implements GameInterface {
 				
 			} catch (ScumException e) {
 				id.sendMessageToClient(e.getMessage());
+				System.out.println(e.getMessage());
 				continue;
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			break;
 		} 
@@ -576,8 +632,11 @@ public class Game implements GameInterface {
 	public void playWithNPlayers(int n, int startIndex) {
 		/* Stop play when only one player is left. */
 		if (n < 2) {
+			/* Announce results to all players */
+			announce(players.get(0) + " is Scum!");
 			System.out.println(players.get(0) + " is Scum!");
 			scoreboard[ithWinner] = players.get(0);
+			setGameOver();
 			return;
 		}
 		/* Play the game until someone has an empty hand */
@@ -595,6 +654,7 @@ public class Game implements GameInterface {
 				/* Increment here to skip the next player */
 				i++;
 				System.out.println("\n" + players.get(currentPlayer) + " has been skipped!");
+				announce("\n" + players.get(currentPlayer) + " has been skipped!");
 				skipNextTurnFlag = false;
 			}
 		}
@@ -616,6 +676,7 @@ public class Game implements GameInterface {
 				else 
 					winnerMessage += "Noodge!";
 				
+				announce(winnerMessage);
 				System.out.println(winnerMessage);
 				/* Assign winner to scoreboard array */
 				scoreboard[ithWinner] = winner();
@@ -653,6 +714,7 @@ public class Game implements GameInterface {
 			else 
 				winnerMessage += "Noodge";
 			
+			announce(winnerMessage);
 			System.out.println(winnerMessage);
 		}
 	}
@@ -660,6 +722,7 @@ public class Game implements GameInterface {
 	@Override
 	public void start() {
 		playWithNPlayers(numberOfPlayers, 0);
+		announce("Game over.\n");
 		System.out.println("Game over.\n");
 		printScoreboard();
 	}

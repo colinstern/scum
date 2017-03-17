@@ -17,9 +17,12 @@ public class Player implements PlayerInterface{
 	
 	private boolean isMessageToGame;
 	
+	private boolean isGameOver;
+	
 	private String messageToClient;
 	
 	private String messageToGame;
+	
 	
 	public Player(int id) {
 		this.id = id;
@@ -30,6 +33,7 @@ public class Player implements PlayerInterface{
 		this.isMessageToGame = false;
 		this.messageToClient = null;
 		this.messageToGame = null;
+		this.isGameOver = false;
 	}
 	
 	@Override
@@ -171,6 +175,22 @@ public class Player implements PlayerInterface{
 	public void sendMessageToGame(String message) {
 		messageToGame = message;
 		isMessageToGame = true;
+	}
+	
+	/**
+	 * Checks flag for whether game is over.
+	 * @return If game is over.
+	 */
+	public boolean isGameOver() {
+		return isGameOver;
+	}
+	
+	/**
+	 * Sets whether the game is over.
+	 * @param set New value of isGameOver flag.
+	 */
+	public void setIsGameOver(boolean set) {
+		isGameOver = set;
 	}
 
 	@Override

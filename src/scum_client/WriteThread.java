@@ -17,10 +17,17 @@ public class WriteThread extends Thread {
 	public void run() {
 		try {
 		 while (true) {
-			 fromUser = stdIn.readLine();
+			 synchronized(stdIn) {
+				 fromUser = stdIn.readLine();
+			 }
              if ((fromUser != null) && !fromUser.equals("quit")) {
              	//Send to server
-                 out.println(fromUser);
+            	 synchronized(out) {
+            		 out.println(fromUser);
+            	 }
+             }
+             else if (fromUser == null) {
+            	 break;
              }
              else if (fromUser.equals("quit")) {
             	 System.out.println("Quitting Scum.");
@@ -32,5 +39,6 @@ public class WriteThread extends Thread {
 			 System.err.println("Couldn't write! " + e.getMessage());
 		            System.exit(1);
 		}
+		System.out.println("Done writing.");
 	}
 }

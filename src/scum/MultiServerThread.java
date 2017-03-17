@@ -32,40 +32,70 @@ public class MultiServerThread extends Thread {
          	 * though because giveTurn() uses pointers to each player */
         	 outputLine = "Welcome to Scum, Player " + thisPlayer.getId() + ".";
         	 out.println(outputLine);
+        	 System.out.println(outputLine);
         	 
-        	 while(true) {
-        		 while (!thisPlayer.isMessageToClient());
-     			
-     			//Print message to client
-     			outputLine = thisPlayer.getMessageToClient();
-     			out.println(outputLine);
-        	 }
-        	 /* Continue until game is over, when only one player remains */
-//            while (players.size() > 1) {
-//            	/* Check if it is the player's turn */
-//            	if (thisPlayer.isTurn()) {
-//            		//Print that it is this player's turn once	
-//            		outputLine = "\nPlayer " +  thisPlayer.getId()+ ", it is your turn.\n";
-//            		out.println(outputLine);
-//            		while(thisPlayer.isTurn()) {
-//            			//Wait for message from giveTurn
-//            			while (!thisPlayer.isMessageToClient());
-//            			
-//            			//Print message to client
-//            			outputLine = thisPlayer.getMessageToClient();
-//            			out.println(outputLine);
-//            			
-//            			//Wait for client's response
-//            			inputLine = in.readLine();
-//            			
-//            			//Send client's response to giveTurn - use flags in the player object to communicate
-//            			thisPlayer.sendMessageToGame(inputLine);
-//            			
-//            			//Repeat until makeMove is called, then break - makeMove should set isTurn to false
-//            		}
-//            	}
-//            	//Allow socials at all times while game is playing
-//            }
+//    		 while (!thisPlayer.isMessageToClient()) {
+//        		 Thread.sleep(100); 
+//    		 }
+// 			
+//     		outputLine = "\nPlayer " +  thisPlayer.getId()+ ", it is your turn.\n";
+//     		out.println(outputLine);
+//    		 
+//     			//Print message to client
+//     			outputLine = thisPlayer.getMessageToClient();
+//     			out.println(outputLine);
+//
+//        	 inputLine = in.readLine();
+//// 			
+//// 			//Send client's response to giveTurn - use flags in the player object to communicate
+// 			thisPlayer.sendMessageToGame(inputLine);
+
+        	 /* Continue until game is over */
+            while (!thisPlayer.isGameOver()) {
+            	/* Check if it is the player's turn */
+	       		 while (!thisPlayer.isMessageToClient()) {
+	       		 Thread.sleep(100); 
+	       		 }
+				
+	    		outputLine = "\nPlayer " +  thisPlayer.getId()+ ", it is your turn.\n";
+	    		out.println(outputLine);
+	    		System.out.println(outputLine);
+   		 
+    			//Print message to client
+    			outputLine = thisPlayer.getMessageToClient();
+    			out.println(outputLine);
+    			System.out.println(outputLine);
+    			
+    			 inputLine = in.readLine();		
+    			 if (inputLine != null)
+    				 System.out.println(inputLine);
+    			 
+	  			//Send client's response to giveTurn - use flags in the player object to communicate
+	  			thisPlayer.sendMessageToGame(inputLine);
+            	if (thisPlayer.isTurn()) {
+            		//Print that it is this player's turn once	
+            		outputLine = "\nPlayer " +  thisPlayer.getId()+ ", it is your turn.\n";
+            		out.println(outputLine);
+            		System.out.println(outputLine);
+            		while(thisPlayer.isTurn()) {
+            			//Wait for message from giveTurn
+            			while (!thisPlayer.isMessageToClient());
+            			
+            			//Print message to client
+            			outputLine = thisPlayer.getMessageToClient();
+            			out.println(outputLine);
+            			
+            			//Wait for client's response
+            			inputLine = in.readLine();
+            			
+            			//Send client's response to giveTurn - use flags in the player object to communicate
+            			thisPlayer.sendMessageToGame(inputLine);
+            			
+            			//Repeat until makeMove is called, then break - makeMove should set isTurn to false
+            		}
+            	}
+            	//Allow socials at all times while game is playing
+            }
             //Print scoreboard and this player's score
         	 
         	 
@@ -77,6 +107,9 @@ public class MultiServerThread extends Thread {
         }
         catch (ScumException e) {
             System.err.println(e.getMessage());
-        }
+        } catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 }

@@ -14,14 +14,19 @@ public class ReadThread extends Thread {
 	
 	public void run() {
 		try {
-		 while (true) {
-			 if((fromServer = in.readLine()) != null)
-				System.out.println(fromServer);
-		 }
+			 while (true) {
+				 synchronized(in) {
+				 if((fromServer = in.readLine()) != null)
+					System.out.println(fromServer);
+				 else 
+					 break;
+				 }
+			 }
 		}
 		catch (IOException e) {
 			 System.err.println("Couldn't read! " + e.getMessage());
 		            System.exit(1);
 		}
+		System.out.println("Done reading.");
 	}
 }
