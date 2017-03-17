@@ -56,4 +56,11 @@ public class Hand implements HandInterface{
 
 	}
 
+	public String returnPrint() {
+		StringBuilder sb = new StringBuilder();
+		for (Card card: hand) 
+			sb.append(card + "\n");
+		sb.append("Size: " + getSize() + "\n");
+		return sb.toString();
+	}
 }

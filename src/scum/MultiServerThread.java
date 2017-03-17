@@ -37,19 +37,25 @@ public class MultiServerThread extends Thread {
             while (players.size() > 1) {
             	/* Check if it is the player's turn */
             	if (thisPlayer.isTurn()) {
+            		//Print that it is this player's turn once
+            		outputLine = "\nPlayer " +  thisPlayer.getId()+ ", it is your turn.\n";
+            		out.println(outputLine);
             		while(thisPlayer.isTurn()) {
-            			//Tell client it is his turn
+            			//Wait for message from giveTurn
+            			while (!thisPlayer.isMessageToClient());
             			
-            			//Wait for response
+            			//Print message to client
+            			outputLine = thisPlayer.getMessageToClient();
+            			out.println(outputLine);
             			
-            			//Send response to giveTurn - use flags in the player object to communicate
+            			//Wait for client's response
+            			inputLine = in.readLine();
             			
-            			//Send response of giveTurn to client
+            			//Send client's response to giveTurn - use flags in the player object to communicate
+            			thisPlayer.sendMessageToGame(inputLine);
             			
             			//Repeat until makeMove is called, then break - makeMove should set isTurn to false
             		}
-            		
-            		thisPlayer.setIsTurn(false);
             	}
             	//Allow socials at all times while game is playing
             }
@@ -61,6 +67,9 @@ public class MultiServerThread extends Thread {
         } 
         catch (IOException e) {
             e.printStackTrace();
+        }
+        catch (ScumException e) {
+            System.err.println(e.getMessage());
         }
     }
 }

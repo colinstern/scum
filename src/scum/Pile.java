@@ -68,6 +68,15 @@ public class Pile implements PileInterface {
 
 	}
 	
+	public String returnPrint() {
+		StringBuilder sb = new StringBuilder();
+		for (int i = pile.size() - 1; i >= 0; i--) {
+			sb.append(pile.get(i) + "\n");
+		}
+		sb.append("\n");
+		return sb.toString();
+	}
+	
 	/**
 	 * Clears the pile.
 	 */

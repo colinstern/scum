@@ -13,11 +13,23 @@ public class Player implements PlayerInterface{
 	
 	private boolean isTurn;
 	
+	private boolean isMessageToClient;
+	
+	private boolean isMessageToGame;
+	
+	private String messageToClient;
+	
+	private String messageToGame;
+	
 	public Player(int id) {
 		this.id = id;
 		this.hand = new Hand();
 		this.passFlag = false;
 		this.isTurn = false;
+		this.isMessageToClient = false;
+		this.isMessageToGame = false;
+		this.messageToClient = null;
+		this.messageToGame = null;
 	}
 	
 	@Override
@@ -88,12 +100,84 @@ public class Player implements PlayerInterface{
 		hand.print();
 		
 	}
+	
+	public String returnHand() {
+		hand.numberSort();
+		StringBuilder sb = new StringBuilder();
+		sb.append("\nPlayer " + id + "'s hand:\n");
+		sb.append(hand.returnPrint());
+		return sb.toString();
+	}
+	
+	public boolean isMessageToClient() {
+		return isMessageToClient;
+	}
+	
+	public void setIsMessageToClient(boolean set) {
+		isMessageToClient = set;
+	}
+	public boolean isMessageToGame() {
+		return isMessageToGame;
+	}
+	
+	public void setIsMessageToGame(boolean set) {
+		isMessageToGame = set;
+	}
+	
+	/**
+	 * Checks if there is a message message waiting for the client. If so, returns it and empties the "mailbox," 
+	 * stored as messageToClient. 
+	 * @return message to client
+	 * @throws ScumException If there is no message waiting for the client
+	 */
+	public String getMessageToClient() throws ScumException {
+		if (!isMessageToClient)
+			throw new ScumException("No message for client.");
+		isMessageToClient = false;
+		String message = messageToClient;
+		messageToClient = null;
+		return message;
+		
+	}
+	
+	/**
+	 * Checks if there is a message message waiting for the game. If so, returns it and empties the "mailbox," 
+	 * stored as messageToGame. 
+	 * @return message to game
+	 * @throws ScumException If there is no message waiting for the game
+	 */
+	public String getMessageToGame() throws ScumException {
+		if (!isMessageToGame)
+			throw new ScumException("No message for game.");
+		isMessageToGame = false;
+		String message = messageToGame;
+		messageToGame = null;
+		return message;
+	}
+	
+	/**
+	 * Puts a message in the client's mailbox. Sets a flag and stores the message.
+	 * @param message Message to send to the client
+	 */
+	public void sendMessageToClient(String message) {
+		messageToClient = message;
+		isMessageToClient = true;
+	}
+	
+	/**
+	 * Puts a message in the game's mailbox. Sets a flag and stores the message.
+	 * @param message Message to send to the game
+	 */
+	public void sendMessageToGame(String message) {
+		messageToGame = message;
+		isMessageToGame = true;
+	}
 
 	@Override
 	public boolean hasWon() {
 		// TODO Auto-generated method stub
 		return false;
-	}	
+	}
 	
 
 }

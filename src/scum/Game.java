@@ -389,6 +389,7 @@ public class Game implements GameInterface {
 			id.getHand().remove(card);
 			pile.add(card);
 		}
+		id.setIsTurn(false);
 		return true;
 	}
 	
@@ -467,9 +468,29 @@ public class Game implements GameInterface {
 		System.out.println("\nCards must be comma-separated, like this: 3 of clubs, 3 of diamonds\nIf you do not wish to play a card, enter \"pass\". To see the previous move, enter \"prev\".");
 	}
 	
+	public String returnPrintHelp() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("\nCards must be comma-separated, like this: 3 of clubs, 3 of diamonds\nIf you do not wish to play a card, enter \"pass\". To see the previous move, enter \"prev\".\n");
+		return sb.toString();
+	}
+	
 	public void removeAllCardsFromHand(Player id) {
 		for (int i = 0; i < id.getHand().getSize(); i++)
 			id.getHand().remove(i);
+	}
+	
+	public String returnPrintPrev() {
+		StringBuilder sb = new StringBuilder();
+		if (previousMove == null) {
+			sb.append("No previous move to display.\n");
+		}
+		else {
+			sb.append("Previous move:\n");
+			for (Card card : previousMove)
+				sb.append(card + "\n");
+			sb.append("\n");
+		}
+		return sb.toString();
 	}
 
 	/**
@@ -477,8 +498,6 @@ public class Game implements GameInterface {
 	 * @param i The player who gets a turn
 	 */
 	public void giveTurn(Player id, int indexOfPlayersArray) {
-		System.out.printf("\nPlayer %d, it is your turn.\n", id.getId());
-		Scanner scanner = new Scanner(System.in);
 		String input;
 		String[] tokens;
 		Card[] cards;
@@ -487,55 +506,51 @@ public class Game implements GameInterface {
 				if (allOthersHavePassed(indexOfPlayersArray, players.size())) {
 					autoclear();
 				}
-				System.out.println("Enter cards to play. For help, enter \"help\".");
-				id.printHand();
-				input = scanner.nextLine();
+				/* Send message to client */
+				id.sendMessageToClient("Enter cards to play. For help, enter \"help\".\n" + id.returnHand());
+				/* Wait for message from client */
+				while(!id.isMessageToGame());
+				/* Use message from client */
+				input = id.getMessageToGame();
 				if (input.equals("pass")) {
 					id.setPassFlag(true);
 					break;
 				}
 				if (input.equals("hand")) {
-					id.printHand();
+					id.sendMessageToClient(id.returnHand());
 					continue;
 				}
 				if (input.equals("pile")) {
-					pile.print();
+					id.sendMessageToClient(pile.returnPrint());
 					continue;
 				}
 				if (input.equals("prev")) {
-					if (previousMove == null) {
-						System.out.println("No previous move to display.\n");
-						continue;
-					}
-					System.out.println("Previous move:");
-					for (Card card : previousMove)
-						System.out.println(card);
-					System.out.println();
+					id.sendMessageToClient(returnPrintPrev());
 					continue;
 				}
 				if (input.equals("size")) {
-					System.out.println(sizeOfLastMove);
+					id.sendMessageToClient("" + sizeOfLastMove);
 					continue;
 				}
 				if (input.equals("card")) {
 					if (lastPlayedCard != null)
-						System.out.println(lastPlayedCard);
+						id.sendMessageToClient("" + lastPlayedCard);
 					continue;
 				}
 				if (input.equals("help")) {
-					printHelp();
+					id.sendMessageToClient(returnPrintHelp());
 					continue;
 				}
 				tokens = input.split(", ");
 				try {
 					cards = castStringsToCards(tokens);
 				} catch (ScumException e) {
-					System.out.println(e.getMessage() + " Could not interpret the input. Please enter again.\n");
+					id.sendMessageToClient(e.getMessage() + " Could not interpret the input. Please enter again.\n");
 					continue;
 				}
 				if (!isValidMove(cards, id))  {
 					if (errorMessage != null) {
-						System.out.println(errorMessage + "\n");
+						id.sendMessageToClient(errorMessage + "\n");
 						errorMessage = null;
 					}
 					throw new ScumException("This is not a valid move. Please try again.\n");
@@ -543,12 +558,11 @@ public class Game implements GameInterface {
 				makeMove(cards, id);
 				
 			} catch (ScumException e) {
-				System.out.println(e.getMessage());
+				id.sendMessageToClient(e.getMessage());
 				continue;
 			}
 			break;
 		} 
-		//scanner.close(); 
 	}
 	/** 
 	 * Gives turns. Recursively plays with n-1 players once a player wins. Stops game when there is only
