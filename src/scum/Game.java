@@ -75,13 +75,17 @@ public class Game implements GameInterface {
          
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) { 
         	/* Accept new players until n players have joined */
-            while (players.size() < n) {
+        	int i = 0;
+            while ((players.size() < n - 1)) {
                 new MultiServerThread(serverSocket.accept(), players).start();
+                i++;
             }
         } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);
             System.exit(-1);
         }
+        //Wait for clients to connect
+        while (players.size() < n);
 	}
 
 	/**

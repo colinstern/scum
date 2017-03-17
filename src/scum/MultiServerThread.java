@@ -33,37 +33,44 @@ public class MultiServerThread extends Thread {
         	 outputLine = "Welcome to Scum, Player " + thisPlayer.getId() + ".";
         	 out.println(outputLine);
         	 
+        	 while(true) {
+        		 while (!thisPlayer.isMessageToClient());
+     			
+     			//Print message to client
+     			outputLine = thisPlayer.getMessageToClient();
+     			out.println(outputLine);
+        	 }
         	 /* Continue until game is over, when only one player remains */
-            while (players.size() > 1) {
-            	/* Check if it is the player's turn */
-            	if (thisPlayer.isTurn()) {
-            		//Print that it is this player's turn once
-            		outputLine = "\nPlayer " +  thisPlayer.getId()+ ", it is your turn.\n";
-            		out.println(outputLine);
-            		while(thisPlayer.isTurn()) {
-            			//Wait for message from giveTurn
-            			while (!thisPlayer.isMessageToClient());
-            			
-            			//Print message to client
-            			outputLine = thisPlayer.getMessageToClient();
-            			out.println(outputLine);
-            			
-            			//Wait for client's response
-            			inputLine = in.readLine();
-            			
-            			//Send client's response to giveTurn - use flags in the player object to communicate
-            			thisPlayer.sendMessageToGame(inputLine);
-            			
-            			//Repeat until makeMove is called, then break - makeMove should set isTurn to false
-            		}
-            	}
-            	//Allow socials at all times while game is playing
-            }
+//            while (players.size() > 1) {
+//            	/* Check if it is the player's turn */
+//            	if (thisPlayer.isTurn()) {
+//            		//Print that it is this player's turn once	
+//            		outputLine = "\nPlayer " +  thisPlayer.getId()+ ", it is your turn.\n";
+//            		out.println(outputLine);
+//            		while(thisPlayer.isTurn()) {
+//            			//Wait for message from giveTurn
+//            			while (!thisPlayer.isMessageToClient());
+//            			
+//            			//Print message to client
+//            			outputLine = thisPlayer.getMessageToClient();
+//            			out.println(outputLine);
+//            			
+//            			//Wait for client's response
+//            			inputLine = in.readLine();
+//            			
+//            			//Send client's response to giveTurn - use flags in the player object to communicate
+//            			thisPlayer.sendMessageToGame(inputLine);
+//            			
+//            			//Repeat until makeMove is called, then break - makeMove should set isTurn to false
+//            		}
+//            	}
+//            	//Allow socials at all times while game is playing
+//            }
             //Print scoreboard and this player's score
         	 
         	 
         	 
-             socket.close();
+             //socket.close();
         } 
         catch (IOException e) {
             e.printStackTrace();
